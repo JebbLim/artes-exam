@@ -41,8 +41,6 @@ public class ObjectPooling : Singleton<ObjectPooling>
             Poolable newObject = CreateInstance(prefab, this.transform);
             Pool(newObject);
         }
-
-        Debug.LogWarning($"Registered Prefab: {prefab.GetInstanceID()}");
     }
 
     public void Pool(Poolable poolable)

@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "GameConfig", menuName = "Configs/GameConfig")]
@@ -7,12 +8,13 @@ public class GameConfig : ScriptableObject
 
     [Header("Configuration")]
     public GameObject BgTilePrefabs;
-    public SC_Gem Bomb;
-    public SC_Gem[] Gems;
+    public SC_Bomb BombPrefab;
+    public SC_Gem[] GemPrefabs;
     public float BonusAmount = 0.5f;
     public float BombChance = 2f;
     public int DropHeight = 0;
     public float GemSpeed;
+    public int MinGemMatchForBombSpawn = 4;
 
     [Header("Gem Spawning")]
     public float CascadingGemSpawnDelay = 0.2f;
@@ -24,4 +26,9 @@ public class GameConfig : ScriptableObject
     [Header("Display")]
     public float ScoreUpdateSpeed = 5.0f;
     public string ValueStringFormat = "N0";
+
+    public SC_Gem GetGemPrefab(GlobalEnums.GemType gemType)
+    {
+        return GemPrefabs.Single(g => g.type == gemType);
+    }
 }

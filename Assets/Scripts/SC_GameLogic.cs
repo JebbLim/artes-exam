@@ -15,6 +15,10 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
     private ObjectPooling objectPooling;
     private GameConfig config;
 
+    private Vector2Int userLastMovedPosition;
+    private GlobalEnums.GemType userLastMovedType;
+    private bool shouldSpawnBomb = false;
+
     public GlobalEnums.GameState CurrentState { get; private set; }
 
     #region MonoBehaviour
@@ -39,12 +43,12 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
     {
         gameBoard = new GameBoard(7, 7);
 
-        for (int i = 0; i < config.Gems.Length; i++)
+        for (int i = 0; i < config.GemPrefabs.Length; i++)
         {
-            objectPooling.RegisterPrefab(config.Gems[i].gameObject);
+            objectPooling.RegisterPrefab(config.GemPrefabs[i].gameObject);
         }
 
-        objectPooling.RegisterPrefab(config.Bomb.gameObject);
+        objectPooling.RegisterPrefab(config.BombPrefab.gameObject);
 
         Setup();
     }
@@ -56,19 +60,20 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
             for (int y = 0; y < gameBoard.Height; y++)
             {
                 Vector2 _pos = new Vector2(x, y);
-                GameObject _bgTile = Instantiate(SC_GameVariables.Instance.bgTilePrefabs, _pos, Quaternion.identity);
+                GameObject _bgTile = Instantiate(config.BgTilePrefabs, _pos, Quaternion.identity);
                 _bgTile.transform.SetParent(GemsContainer);
                 _bgTile.name = "BG Tile - " + x + ", " + y;
 
-                int _gemToUse = Random.Range(0, SC_GameVariables.Instance.gems.Length);
+                GlobalEnums.GemType _gemToUse = (GlobalEnums.GemType)Random.Range(0, (int)GlobalEnums.GemType.Length);
 
                 int iterations = 0;
-                while (gameBoard.MatchesAt(new Vector2Int(x, y), SC_GameVariables.Instance.gems[_gemToUse]) && iterations < 100)
+                while (gameBoard.MatchesAt(new Vector2Int(x, y), config.GetGemPrefab(_gemToUse)) && iterations < 100)
                 {
-                    _gemToUse = Random.Range(0, SC_GameVariables.Instance.gems.Length);
+                    _gemToUse = (GlobalEnums.GemType)Random.Range(0, (int)GlobalEnums.GemType.Length);
                     iterations++;
                 }
-                SpawnGem(new Vector2Int(x, y), SC_GameVariables.Instance.gems[_gemToUse]);
+
+                SpawnGem(new Vector2Int(x, y), config.GetGemPrefab(_gemToUse));
             }
         }
     }
@@ -79,18 +84,21 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         EvtGameStarted.Invoke();
     }
 
-    private void SpawnGem(Vector2Int _Position, SC_Gem _GemToSpawn)
+    private void SpawnGem(Vector2Int _Position, SC_Gem _GemToSpawn, GlobalEnums.GemType? overrideGemType = null)
     {
-        if (Random.Range(0, 100f) < SC_GameVariables.Instance.bombChance)
-            _GemToSpawn = SC_GameVariables.Instance.bomb;
-
         SC_Gem _gem = objectPooling.GetPooledObject<SC_Gem>(_GemToSpawn);
-        _gem.transform.SetPositionAndRotation(new Vector3(_Position.x, _Position.y + SC_GameVariables.Instance.dropHeight, 0f),
+        _gem.transform.SetPositionAndRotation(new Vector3(_Position.x, _Position.y + config.DropHeight, 0f),
                                               Quaternion.identity);
         
         _gem.transform.SetParent(GemsContainer);
         _gem.name = "Gem - " + _Position.x + ", " + _Position.y;
         gameBoard.SetGem(_Position.x, _Position.y, _gem);
+
+        if (overrideGemType.HasValue)
+        {
+            _gem.type = overrideGemType.Value;
+        }
+
         _gem.SetupGem(this, _Position);
         _gem.gameObject.SetActive(true);
     }
@@ -105,6 +113,12 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         return gameBoard.GetGem(_X, _Y);
     }
 
+    public void UserLastInputData(Vector2Int _position, GlobalEnums.GemType _gemType)
+    {
+        userLastMovedPosition = _position;
+        userLastMovedType = _gemType;
+    }
+
     public void SetState(GlobalEnums.GameState _currentState)
     {
         CurrentState = _currentState;
@@ -112,6 +126,8 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
 
     public void DestroyMatches()
     {
+        CheckLastUserInput();
+
         for (int i = 0; i < gameBoard.CurrentMatches.Count; i++)
         {
             if (gameBoard.CurrentMatches[i] != null)
@@ -121,7 +137,29 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
             }
         }
 
+        StartCoroutine(PostDestroyMatchCO());
+    }
+
+    private IEnumerator PostDestroyMatchCO()
+    {
+        yield return new WaitForSeconds(0.25f);
+        yield return StartCoroutine(SpawnBombCO());
+
         StartCoroutine(DecreaseRowCo());
+    }
+
+    private void CheckLastUserInput()
+    {
+        foreach (KeyValuePair<GlobalEnums.GemType, int> comboCounter in gameBoard.CurrentMatchesComboCounter)
+        {
+            if (userLastMovedType == comboCounter.Key && comboCounter.Value >= config.MinGemMatchForBombSpawn)
+            {
+                shouldSpawnBomb = true;
+                return;
+            }
+        }
+
+        shouldSpawnBomb = false;
     }
 
     private IEnumerator DecreaseRowCo()
@@ -147,7 +185,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
             }
             nullCounter = 0;
         }
-
+        
         StartCoroutine(FilledBoardCo());
     }
 
@@ -187,6 +225,14 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         }
     }
 
+    private IEnumerator SpawnBombCO()
+    {
+        if (shouldSpawnBomb == false) yield break;
+
+        SpawnGem(userLastMovedPosition, config.BombPrefab, userLastMovedType);
+        yield return new WaitForSeconds(config.CascadingGemSpawnDelay);
+    }
+
     private IEnumerator RefillBoard()
     {
         for (int x = 0; x < gameBoard.Width; x++)
@@ -198,30 +244,25 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
                 {
                     GlobalEnums.GemType? selectedGemType = null;
                     System.Random rand = new();
-                    int length = (int)GlobalEnums.GemType.Length - 1;
+                    int length = (int)GlobalEnums.GemType.Length;
                     for (int i = length - 1; i > 0; i--)
                     {
                         GlobalEnums.GemType gemType = (GlobalEnums.GemType)rand.Next(i + 1);
 
-                        if (gameBoard.IsMatch(x, y, gemType) == false)
+                        if (gameBoard.IsTypeMatch(x, y, gemType) == false)
                         {
                             selectedGemType = gemType;
                             break;
                         }
                     }
 
-                    SC_Gem gemPrefab = null;
-                    /// Temp Gem Type calling
-                    if (selectedGemType != null)
+                    if (selectedGemType == null)
                     {
-                        gemPrefab = SC_GameVariables.Instance.GetGemPrefab(selectedGemType.Value);
+                        selectedGemType = (GlobalEnums.GemType)Random.Range(0, length);
+                        Debug.LogError($"[GB] Randomized: {selectedGemType}");
                     }
-                    else
-                    {
-                        int gemToUse = Random.Range(0, SC_GameVariables.Instance.gems.Length);
-                        gemPrefab = SC_GameVariables.Instance.gems[gemToUse];
-                        Debug.LogError($"[GB] Randomized: {gemPrefab.type}");
-                    }
+
+                    SC_Gem gemPrefab = config.GetGemPrefab(selectedGemType.Value);
 
                     SpawnGem(new Vector2Int(x, y), gemPrefab);
                     yield return new WaitForSeconds(config.CascadingGemSpawnDelay);

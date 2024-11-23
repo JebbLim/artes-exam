@@ -19,6 +19,9 @@ public class GameBoard
 
     private List<SC_Gem> currentMatches = new();
     public IReadOnlyList<SC_Gem> CurrentMatches => currentMatches;
+
+    private Dictionary<GlobalEnums.GemType, int> currentMatchesComboCounter = new();
+    public IReadOnlyDictionary<GlobalEnums.GemType, int> CurrentMatchesComboCounter => currentMatchesComboCounter;
     #endregion
 
     public GameBoard(int _Width, int _Height)
@@ -55,17 +58,15 @@ public class GameBoard
         return allGems[_X, _Y];
     }
 
-    public bool IsMatch(int x, int y, GlobalEnums.GemType gemType)
+    public bool IsTypeMatch(int x, int y, GlobalEnums.GemType gemType)
     {
         if (x < 0 || y < 0) return false;
         if (x > width - 1 || y > height - 1) return false;
 
-        Debug.LogWarning($"Checking: {gemType}");
-
-        if (x > 0 && x < width - 1)
+        if (x >= 0 && x <= width - 1)
         {
-            SC_Gem leftGem = allGems[x - 1, y];
-            SC_Gem rightGem = allGems[x + 1, y];
+            SC_Gem leftGem = (x > 0) ? allGems[x - 1, y] : null;
+            SC_Gem rightGem = (x < width - 1) ? allGems[x + 1, y] : null;
 
             // Check for empty spots
             if (leftGem != null && rightGem != null)
@@ -73,7 +74,6 @@ public class GameBoard
                 //Match
                 if (leftGem.type == gemType && rightGem.type == gemType)
                 {
-                    Debug.LogWarning($"Check Confirmed [Horizontal]: {gemType}");
                     return true;
                 }
             }
@@ -88,7 +88,6 @@ public class GameBoard
                         // Match
                         if (leftGem.type == gemType && leftLeftGem.type == gemType)
                         {
-                            Debug.LogWarning($"Extended Check Confirmed [Left-Horizontal] : {gemType}");
                             return true;
                         }
                     }
@@ -102,7 +101,6 @@ public class GameBoard
                         // Match
                         if (rightGem.type == gemType && rightRightGem.type == gemType)
                         {
-                            Debug.LogWarning($"Extended Check Confirmed [Right-Horizontal] : {gemType}");
                             return true;
                         }
                     }
@@ -110,10 +108,10 @@ public class GameBoard
             }
         }
 
-        if (y > 0 && y < height - 1)
+        if (y >= 0 && y <= height - 1)
         {
-            SC_Gem aboveGem = allGems[x, y - 1];
-            SC_Gem belowGem = allGems[x, y + 1];
+            SC_Gem aboveGem = (y > 0) ? allGems[x, y - 1] : null;
+            SC_Gem belowGem = (y < height - 1) ? allGems[x, y + 1] : null;
 
             // Check for empty spots
             if (aboveGem != null && belowGem != null)
@@ -121,7 +119,6 @@ public class GameBoard
                 //Match
                 if (aboveGem.type == gemType && belowGem.type == gemType)
                 {
-                    Debug.LogWarning($"Check Confirmed [Vertical]: {gemType}");
                     return true;
                 }
             }
@@ -136,7 +133,6 @@ public class GameBoard
                         // Match
                         if (aboveGem.type == gemType && aboveAboveGem.type == gemType)
                         {
-                            Debug.LogWarning($"Extended Check Confirmed [Above-Vertical] : {gemType}");
                             return true;
                         }
                     }
@@ -150,7 +146,6 @@ public class GameBoard
                         // Match
                         if (belowGem.type == gemType && belowBelowGem.type == gemType)
                         {
-                            Debug.LogWarning($"Extended Check Confirmed [Below-Vertical] : {gemType}");
                             return true;
                         }
                     }
@@ -158,13 +153,13 @@ public class GameBoard
             }
         }
 
-        Debug.Log($"Clear: {gemType}");
         return false;
     }
 
     public void FindAllMatches()
     {
         currentMatches.Clear();
+        currentMatchesComboCounter.Clear();
 
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
@@ -195,19 +190,19 @@ public class GameBoard
                     if (y > 0 && y < height - 1)
                     {
                         SC_Gem aboveGem = allGems[x, y - 1];
-                        SC_Gem bellowGem = allGems[x, y + 1];
+                        SC_Gem belowGem = allGems[x, y + 1];
                         //checking no empty spots
-                        if (aboveGem != null && bellowGem != null)
+                        if (aboveGem != null && belowGem != null)
                         {
                             //Match
-                            if (aboveGem.type == currentGem.type && bellowGem.type == currentGem.type)
+                            if (aboveGem.type == currentGem.type && belowGem.type == currentGem.type)
                             {
                                 currentGem.isMatch = true;
                                 aboveGem.isMatch = true;
-                                bellowGem.isMatch = true;
+                                belowGem.isMatch = true;
                                 currentMatches.Add(currentGem);
                                 currentMatches.Add(aboveGem);
-                                currentMatches.Add(bellowGem);
+                                currentMatches.Add(belowGem);
                             }
                         }
                     }
@@ -215,7 +210,21 @@ public class GameBoard
             }
 
         if (currentMatches.Count > 0)
+        {
             currentMatches = currentMatches.Distinct().ToList();
+
+            for (int i = 0; i < currentMatches.Count; i++)
+            {
+                if (currentMatchesComboCounter.ContainsKey(currentMatches[i].type) == false)
+                {
+                    currentMatchesComboCounter.Add(currentMatches[i].type, 1);
+                }
+                else
+                {
+                    currentMatchesComboCounter[currentMatches[i].type]++;
+                }
+            }
+        }
 
         CheckForBombs();
     }
@@ -225,32 +234,9 @@ public class GameBoard
         for (int i = 0; i < currentMatches.Count; i++)
         {
             SC_Gem gem = currentMatches[i];
-            int x = gem.posIndex.x;
-            int y = gem.posIndex.y;
+            if (gem is not SC_Bomb) continue;
 
-            if (gem.posIndex.x > 0)
-            {
-                if (allGems[x - 1, y] != null && allGems[x - 1, y].type == GlobalEnums.GemType.Bomb)
-                    MarkBombArea(new Vector2Int(x - 1, y), allGems[x - 1, y].blastSize);
-            }
-
-            if (gem.posIndex.x + 1 < width)
-            {
-                if (allGems[x + 1, y] != null && allGems[x + 1, y].type == GlobalEnums.GemType.Bomb)
-                    MarkBombArea(new Vector2Int(x + 1, y), allGems[x + 1, y].blastSize);
-            }
-
-            if (gem.posIndex.y > 0)
-            {
-                if (allGems[x, y - 1] != null && allGems[x, y - 1].type == GlobalEnums.GemType.Bomb)
-                    MarkBombArea(new Vector2Int(x, y - 1), allGems[x, y - 1].blastSize);
-            }
-
-            if (gem.posIndex.y + 1 < height)
-            {
-                if (allGems[x, y + 1] != null && allGems[x, y + 1].type == GlobalEnums.GemType.Bomb)
-                    MarkBombArea(new Vector2Int(x, y + 1), allGems[x, y + 1].blastSize);
-            }
+            MarkBombArea(gem.posIndex, (gem as SC_Bomb).BlastSize);
         }
     }
 
