@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SC_GameVariables : MonoBehaviour
+public class SC_GameVariables : Singleton<SC_GameVariables>
 {
     public GameObject bgTilePrefabs;
     public SC_Gem bomb;
@@ -19,24 +19,8 @@ public class SC_GameVariables : MonoBehaviour
     [HideInInspector]
     public int colsSize = 7;
 
-    #region Singleton
-
-    static SC_GameVariables instance;
-    public static SC_GameVariables Instance
-    {
-        get
-        {
-            if (instance == null)
-                instance = GameObject.Find("SC_GameVariables").GetComponent<SC_GameVariables>();
-
-            return instance;
-        }
-    }
-
     public SC_Gem GetGemPrefab(GlobalEnums.GemType gemType)
     {
         return gems.Single(g => g.type == gemType);
     }
-
-    #endregion
 }

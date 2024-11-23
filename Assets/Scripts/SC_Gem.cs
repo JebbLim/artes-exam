@@ -1,26 +1,24 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SC_Gem : MonoBehaviour
 {
-    [HideInInspector]
-    public Vector2Int posIndex;
+    public GlobalEnums.GemType type;
+    public bool isMatch;
+    public GameObject destroyEffect;
+    public int scoreValue = 10;
+    public int blastSize = 1;
 
+    private SC_GameLogic scGameLogic;
     private Vector2 firstTouchPosition;
     private Vector2 finalTouchPosition;
+
     private bool mousePressed;
     private float swipeAngle = 0;
     private SC_Gem otherGem;
-
-    public GlobalEnums.GemType type;
-    public bool isMatch = false;
     private Vector2Int previousPos;
-    public GameObject destroyEffect;
-    public int scoreValue = 10;
 
-    public int blastSize = 1;
-    private SC_GameLogic scGameLogic;
+    [HideInInspector] public Vector2Int posIndex;
 
     void Update()
     {
@@ -42,7 +40,21 @@ public class SC_Gem : MonoBehaviour
         }
     }
 
-    public void SetupGem(SC_GameLogic _ScGameLogic,Vector2Int _Position)
+    private void OnDisable()
+    {
+        isMatch = false;
+        firstTouchPosition = Vector2.zero;
+        finalTouchPosition = Vector2.zero;
+
+        mousePressed = false;
+        swipeAngle = 0;
+        otherGem = null;
+        previousPos = Vector2Int.zero;
+
+        posIndex = Vector2Int.zero;
+    }
+
+    public void SetupGem(SC_GameLogic _ScGameLogic, Vector2Int _Position)
     {
         posIndex = _Position;
         scGameLogic = _ScGameLogic;
@@ -96,7 +108,7 @@ public class SC_Gem : MonoBehaviour
             posIndex.x--;
         }
 
-        scGameLogic.SetGem(posIndex.x,posIndex.y, this);
+        scGameLogic.SetGem(posIndex.x, posIndex.y, this);
         scGameLogic.SetGem(otherGem.posIndex.x, otherGem.posIndex.y, otherGem);
 
         StartCoroutine(CheckMoveCo());

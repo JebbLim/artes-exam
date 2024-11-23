@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
-public class ObjectPooling : MonoBehaviour
+public class ObjectPooling : Singleton<ObjectPooling>
 {
     [System.Serializable]
     public struct PoolData
@@ -27,7 +26,7 @@ public class ObjectPooling : MonoBehaviour
         }
     }
 
-    public void RegisterPrefab(GameObject prefab, int amount)
+    public void RegisterPrefab(GameObject prefab, int amount = 0)
     {
         if (pools.ContainsKey(prefab))
         {
@@ -37,9 +36,9 @@ public class ObjectPooling : MonoBehaviour
 
         pools.Add(prefab, new());
 
-        for (int j = 0; j < amount; j++)
+        for (int i = 0; i < amount; i++)
         {
-            Poolable newObject = CreateInstance(prefab);
+            Poolable newObject = CreateInstance(prefab, this.transform);
             Pool(newObject);
         }
 
@@ -60,7 +59,7 @@ public class ObjectPooling : MonoBehaviour
         poolable.IsPooled = true;
     }
 
-    public GameObject GetPooledObject(GameObject key)
+    public GameObject GetPooledObject(GameObject key, Transform parent = null)
     {
         if (!pools.ContainsKey(key))
         {
@@ -81,34 +80,31 @@ public class ObjectPooling : MonoBehaviour
                     return poolable.gameObject;
                 }
             }
-
-            //foreach (Poolable poolable in pools[key])
-            //{
-            //    if (poolable.IsPooled)
-            //    {
-            //        pools[key].Remove(poolable);
-            //        poolable.IsPooled = false;
-            //        return poolable.gameObject;
-            //    }
-            //}
-
-            //Poolable poolable = pools[key].FirstOrDefault(o => o.IsPooled);
-            //if (poolable)
-            //{
-            //    pools[key].Remove(poolable);
-            //    poolable.IsPooled = false;
-            //    return poolable.gameObject;
-            //}
         }
 
-        Poolable newObject = CreateInstance(key);
+        Poolable newObject = CreateInstance(key, parent);
         newObject.IsPooled = false;
         return newObject.gameObject;
     }
 
-    private Poolable CreateInstance(GameObject prefab)
+    public GameObject GetPooledObject(MonoBehaviour keyBehavior, Transform parent = null)
     {
-        Poolable newObject = Instantiate(prefab).AddComponent<Poolable>();
+        return GetPooledObject(keyBehavior.gameObject, parent);
+    }
+
+    public T GetPooledObject<T>(GameObject key, Transform parent = null) where T : MonoBehaviour
+    {
+        return GetPooledObject(key, parent).GetComponent<T>();
+    }
+
+    public T GetPooledObject<T>(MonoBehaviour keyBehavior, Transform parent = null) where T : MonoBehaviour
+    {
+        return GetPooledObject(keyBehavior.gameObject, parent).GetComponent<T>();
+    }
+
+    private Poolable CreateInstance(GameObject prefab, Transform parent)
+    {
+        Poolable newObject = Instantiate(prefab, parent).AddComponent<Poolable>();
         newObject.Setup(this, prefab);
         return newObject;
     }
