@@ -12,6 +12,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
     public Transform GemsContainer;
 
     private GameBoard gameBoard;
+    private ObjectPooling objectPooling;
     private GameConfig config;
 
     public GlobalEnums.GameState CurrentState { get; private set; }
@@ -22,6 +23,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         base.Awake();
 
         config = GameConfig.Config;
+        objectPooling = ObjectPooling.Instance;
 
         Init();
     }
@@ -36,6 +38,14 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
     private void Init()
     {
         gameBoard = new GameBoard(7, 7);
+
+        for (int i = 0; i < config.Gems.Length; i++)
+        {
+            objectPooling.RegisterPrefab(config.Gems[i].gameObject);
+        }
+
+        objectPooling.RegisterPrefab(config.Bomb.gameObject);
+
         Setup();
     }
 
@@ -74,11 +84,15 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         if (Random.Range(0, 100f) < SC_GameVariables.Instance.bombChance)
             _GemToSpawn = SC_GameVariables.Instance.bomb;
 
-        SC_Gem _gem = Instantiate(_GemToSpawn, new Vector3(_Position.x, _Position.y + SC_GameVariables.Instance.dropHeight, 0f), Quaternion.identity);
+        SC_Gem _gem = objectPooling.GetPooledObject<SC_Gem>(_GemToSpawn);
+        _gem.transform.SetPositionAndRotation(new Vector3(_Position.x, _Position.y + SC_GameVariables.Instance.dropHeight, 0f),
+                                              Quaternion.identity);
+        
         _gem.transform.SetParent(GemsContainer);
         _gem.name = "Gem - " + _Position.x + ", " + _Position.y;
         gameBoard.SetGem(_Position.x, _Position.y, _gem);
         _gem.SetupGem(this, _Position);
+        _gem.gameObject.SetActive(true);
     }
 
     public void SetGem(int _X, int _Y, SC_Gem _Gem)
@@ -150,7 +164,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         {
             Instantiate(_curGem.destroyEffect, new Vector2(_Pos.x, _Pos.y), Quaternion.identity);
 
-            Destroy(_curGem.gameObject);
+            _curGem.gameObject.GetComponent<Poolable>().Pool();
             SetGem(_Pos.x, _Pos.y, null);
         }
     }
