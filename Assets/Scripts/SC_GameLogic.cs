@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -104,8 +105,9 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         _gem.transform.SetPositionAndRotation(new Vector3(_position.x, _position.y + config.DropHeight, 0f),
                                               Quaternion.identity);
 
+        string name = _gem is SC_Bomb ? "Bomb" : "Gem";
         _gem.transform.SetParent(GemsContainer);
-        _gem.name = "Gem - " + _position.x + ", " + _position.y;
+        _gem.name = $"{name} - " + _position.x + ", " + _position.y;
         gameBoard.SetGem(_position.x, _position.y, _gem);
 
         if (_overrideGemType.HasValue)
@@ -154,6 +156,9 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         DestroyGems(gameBoard.CurrentBombMatches);
         yield return new WaitForSeconds(config.SpawnDelayAfterDestruction);
 
+        gameBoard.CleanBoard();
+        yield return null;
+
         yield return StartCoroutine(SpawnBombCO());
         yield return null;
 
@@ -172,7 +177,6 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
                 Vector2Int posIndex = gems[i].posIndex;
                 if (gameBoard.GetGem(posIndex.x, posIndex.y) == null) continue;
 
-                Debug.Log($"Destroying: {posIndex}", gems[i]);
                 ScoreCheck(gems[i]);
                 DestroyMatchedGemsAt(posIndex);
             }

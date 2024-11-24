@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b8c0c8e6152db4a91dcecc8fb5378a, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
-  BgTilePrefabs: {fileID: 2914066502361773997, guid: 3f39182b81f944a4d93213431acb41c3,
+  BgTilePrefab: {fileID: 2914066502361773997, guid: 3f39182b81f944a4d93213431acb41c3,
     type: 3}
   BombPrefab: {fileID: 4999180322261073994, guid: aa0291e650b382941875040db9e8a232,
     type: 3}
