@@ -48,34 +48,6 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
     private void Start()
     {
         StartGame();
-        StartCoroutine(UpdateCO());
-    }
-
-    public bool Print;
-    public Vector2Int Coordinates;
-    private IEnumerator UpdateCO()
-    {
-        while (true)
-        {
-            if (Print == false)
-            {
-                yield return null;
-                continue;
-            }
-
-            SC_Gem gem = gameBoard.GetGem(Coordinates.x, Coordinates.y);
-
-            if (gem)
-            {
-                Debug.Log($"Name: {gem.name}; Pos: {gem.posIndex}; IsBomb: {gem is SC_Bomb}; Type: {gem.type}", gem.gameObject);
-            }
-            else
-            {
-                Debug.Log($"Gem is null");
-            }
-
-            yield return new WaitForSeconds(0.1f);
-        }
     }
 
     #endregion
@@ -339,7 +311,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
 
     private void CheckMisplacedGems()
     {
-        List<SC_Gem> foundGems = FindObjectsOfType<SC_Gem>().ToList();
+        List<SC_Gem> foundGems = GemsContainer.GetComponentsInChildren<SC_Gem>().ToList();
 
         for (int x = 0; x < gameBoard.Width; x++)
         {

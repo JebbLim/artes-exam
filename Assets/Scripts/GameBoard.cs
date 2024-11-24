@@ -293,17 +293,14 @@ public class GameBoard
     {
         List<SC_Gem> bombBlastAreaMatches = new();
 
-        for (int x = bombPos.x - _blastSize; x <= bombPos.x + _blastSize; x++)
+        for (int x = 0; x < Width; x++)
         {
-            for (int y = bombPos.y - _blastSize; y <= bombPos.y + _blastSize; y++)
+            for (int y = 0; y < Height; y++)
             {
-                if (x >= 0 && x < Width && y >= 0 && y < Height)
+                int distance = Mathf.Abs(x - bombPos.x) + Mathf.Abs(y - bombPos.y);
+                if (distance <= _blastSize)
                 {
-                    if (allGems[x, y] != null)
-                    {
-                        allGems[x, y].isMatch = true;
-                        bombBlastAreaMatches.Add(allGems[x, y]);
-                    }
+                    bombBlastAreaMatches.Add(allGems[x, y]);
                 }
             }
         }
