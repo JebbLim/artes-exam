@@ -17,11 +17,11 @@ public class GameConfig : ScriptableObject
     public int MinGemMatchForBombSpawn = 4;
 
     [Header("Destroy Configuration")]
-    public float BombBlastDelay = 0.25f;
-    public float BombDelay = 0.25f;
+    public float BombBlastDelay = 0.2f;
+    public float BombDelay = 0.2f;
 
     [Header("Gem Spawning")]
-    public float SpawnDelayAfterDestruction = 0.25f;
+    public float SpawnDelayAfterDestruction = 0.2f;
     public float CascadingGemSpawnDelay = 0.2f;
 
     //[Header("Board")]

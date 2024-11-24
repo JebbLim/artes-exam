@@ -6,6 +6,7 @@ public class SC_Bomb : SC_Gem
 {
     [Header("Bomb Configuration")]
     public int BlastSize = 1;
+    public float DespawnDelay = 0.15f;
 
     [Header("Bomb References")]
     public SpriteRenderer ColorSprite;
@@ -24,7 +25,7 @@ public class SC_Bomb : SC_Gem
 
     private IEnumerator DespawnCO()
     {
-        yield return new WaitForSeconds(0.15f);
+        yield return new WaitForSeconds(DespawnDelay);
         Instantiate(destroyEffect, new Vector2(posIndex.x, posIndex.y), Quaternion.identity);
         GetComponent<Poolable>().Pool();
     }

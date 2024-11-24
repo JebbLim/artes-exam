@@ -241,11 +241,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  isMatch: 0
+  scoreValue: 10
+  spriteRenderer: {fileID: 1210587634127288448}
   destroyEffect: {fileID: 8968486364681163996, guid: 05c754e3d4f9fd349ac1def58d17670f,
     type: 3}
-  scoreValue: 10
-  blastSize: 1
-  spriteRenderer: {fileID: 1210587634127288448}
   posIndex: {x: 0, y: 0}
+  isMatch: 0
+  BlastSize: 2
+  DespawnDelay: 0.15
   ColorSprite: {fileID: 7699685489904338081}
