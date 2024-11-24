@@ -74,7 +74,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
             for (int y = 0; y < gameBoard.Height; y++)
             {
                 Vector2 _pos = new Vector2(x, y);
-                GameObject _bgTile = Instantiate(config.BgTilePrefabs, _pos, Quaternion.identity);
+                GameObject _bgTile = Instantiate(config.BgTilePrefab, _pos, Quaternion.identity);
                 _bgTile.transform.SetParent(GemsContainer);
                 _bgTile.name = "BG Tile - " + x + ", " + y;
 
@@ -160,7 +160,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         gameBoard.CleanBoard();
         yield return null;
 
-        StartCoroutine(DecreaseRowCo());
+        StartCoroutine(DecreaseRowCO());
     }
 
     private void DestroyGems(IReadOnlyList<SC_Gem> gems)
@@ -169,8 +169,12 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         {
             if (gems[i] != null)
             {
+                Vector2Int posIndex = gems[i].posIndex;
+                if (gameBoard.GetGem(posIndex.x, posIndex.y) == null) continue;
+
+                Debug.Log($"Destroying: {posIndex}", gems[i]);
                 ScoreCheck(gems[i]);
-                DestroyMatchedGemsAt(gems[i].posIndex);
+                DestroyMatchedGemsAt(posIndex);
             }
         }
     }
@@ -192,7 +196,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         }
     }
 
-    private IEnumerator DecreaseRowCo()
+    private IEnumerator DecreaseRowCO()
     {
         yield return null;
 

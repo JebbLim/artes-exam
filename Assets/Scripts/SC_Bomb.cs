@@ -11,9 +11,9 @@ public class SC_Bomb : SC_Gem
     [Header("Bomb References")]
     public SpriteRenderer ColorSprite;
 
-    public override void SetupGem(SC_GameLogic _ScGameLogic, Vector2Int _Position)
+    public override void SetupGem(SC_GameLogic _scGameLogic, Vector2Int _position)
     {
-        base.SetupGem(_ScGameLogic, _Position);
+        base.SetupGem(_scGameLogic, _position);
 
         ColorSprite.sprite = GameConfig.Config.GetGemPrefab(type).spriteRenderer.sprite;
     }
