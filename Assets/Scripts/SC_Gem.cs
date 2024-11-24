@@ -3,13 +3,16 @@ using UnityEngine;
 
 public class SC_Gem : MonoBehaviour
 {
+    [Header("Configuration")]
     public GlobalEnums.GemType type;
-    public bool isMatch;
-    public GameObject destroyEffect;
     public int scoreValue = 10;
-    public int blastSize = 1;
+
+    [Header("References")]
+    public SpriteRenderer spriteRenderer;
+    public GameObject destroyEffect;
 
     private SC_GameLogic scGameLogic;
+    private GameConfig gameConfig;
     private Vector2 firstTouchPosition;
     private Vector2 finalTouchPosition;
 
@@ -18,12 +21,13 @@ public class SC_Gem : MonoBehaviour
     private SC_Gem otherGem;
     private Vector2Int previousPos;
 
-    [HideInInspector] public Vector2Int posIndex;
+    public Vector2Int posIndex;
+    [HideInInspector] public bool isMatch;
 
     void Update()
     {
         if (Vector2.Distance(transform.position, posIndex) > 0.01f)
-            transform.position = Vector2.Lerp(transform.position, posIndex, SC_GameVariables.Instance.gemSpeed * Time.deltaTime);
+            transform.position = Vector2.Lerp(transform.position, posIndex, gameConfig.GemSpeed * Time.deltaTime);
         else
         {
             transform.position = new Vector3(posIndex.x, posIndex.y, 0);
@@ -52,10 +56,14 @@ public class SC_Gem : MonoBehaviour
         previousPos = Vector2Int.zero;
 
         posIndex = Vector2Int.zero;
+
+        StopAllCoroutines();
     }
 
-    public void SetupGem(SC_GameLogic _ScGameLogic, Vector2Int _Position)
+    public virtual void SetupGem(SC_GameLogic _ScGameLogic, Vector2Int _Position)
     {
+        gameConfig = GameConfig.Config;
+
         posIndex = _Position;
         scGameLogic = _ScGameLogic;
     }
@@ -82,14 +90,14 @@ public class SC_Gem : MonoBehaviour
     {
         previousPos = posIndex;
 
-        if (swipeAngle < 45 && swipeAngle > -45 && posIndex.x < SC_GameVariables.Instance.rowsSize - 1)
+        if (swipeAngle < 45 && swipeAngle > -45 && posIndex.x < gameConfig.RowsSize - 1)
         {
             otherGem = scGameLogic.GetGem(posIndex.x + 1, posIndex.y);
             otherGem.posIndex.x--;
             posIndex.x++;
 
         }
-        else if (swipeAngle > 45 && swipeAngle <= 135 && posIndex.y < SC_GameVariables.Instance.colsSize - 1)
+        else if (swipeAngle > 45 && swipeAngle <= 135 && posIndex.y < gameConfig.ColsSize - 1)
         {
             otherGem = scGameLogic.GetGem(posIndex.x, posIndex.y + 1);
             otherGem.posIndex.y--;
@@ -136,8 +144,16 @@ public class SC_Gem : MonoBehaviour
             }
             else
             {
+                scGameLogic.UserLastInputData(new SC_GameLogic.UserLastMovedData(posIndex, type),
+                                              new SC_GameLogic.UserLastMovedData(otherGem.posIndex, otherGem.type));
                 scGameLogic.DestroyMatches();
             }
         }
+    }
+
+    public virtual void Despawn()
+    {
+        Instantiate(destroyEffect, new Vector2(posIndex.x, posIndex.y), Quaternion.identity);
+        GetComponent<Poolable>().Pool();
     }
 }

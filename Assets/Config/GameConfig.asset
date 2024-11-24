@@ -12,18 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b8c0c8e6152db4a91dcecc8fb5378a, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
-  BgTilePrefabs: {fileID: 0}
-  Bomb: {fileID: 7728721766547317714, guid: aa0291e650b382941875040db9e8a232, type: 3}
-  Gems:
+  BgTilePrefabs: {fileID: 2914066502361773997, guid: 3f39182b81f944a4d93213431acb41c3,
+    type: 3}
+  BombPrefab: {fileID: 4999180322261073994, guid: aa0291e650b382941875040db9e8a232,
+    type: 3}
+  GemPrefabs:
   - {fileID: -7932498854989450506, guid: 724e93e48c6cc0b4ab3d44e5ea34f2ec, type: 3}
   - {fileID: 1972979191936378847, guid: 784323496d719684cb6201b200b95864, type: 3}
   - {fileID: 3416069867743778491, guid: 93bd623174244c047af9ce43cc254c32, type: 3}
   - {fileID: 8289337781777951430, guid: 473855e3d0d3c8143836b678c9a1b8b5, type: 3}
   - {fileID: 4372168081761593873, guid: 91ba2370328500d4db689dad894b1602, type: 3}
   BonusAmount: 0.5
-  BombChance: 2
-  DropHeight: 0
-  GemSpeed: 0
+  BombChance: 3
+  DropHeight: 1
+  GemSpeed: 7
+  MinGemMatchForBombSpawn: 4
   CascadingGemSpawnDelay: 0.2
   RowsSize: 7
   ColsSize: 7

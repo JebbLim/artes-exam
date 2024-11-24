@@ -2,107 +2,107 @@
 using System.Linq;
 using UnityEngine;
 
+[System.Serializable]
 public class GameBoard
 {
     #region Variables
 
-    private int height = 0;
-    public int Height { get { return height; } }
-
-    private int width = 0;
-    public int Width { get { return width; } }
-
-    private SC_Gem[,] allGems;
-    //  public Gem[,] AllGems { get { return allGems; } }
-
+    public int Height { get; private set; } = 0;
+    public int Width { get; private set; } = 0;
     public int Score { get; set; }
 
+    private SC_Gem[,] allGems;
     private List<SC_Gem> currentMatches = new();
+    private List<SC_Bomb> currentBombMatches = new();
+    private List<SC_Gem> currentBombBlastMatches = new();
+    private Dictionary<GlobalEnums.GemType, int> currentMatchesComboCounter = new();
+
     public IReadOnlyList<SC_Gem> CurrentMatches => currentMatches;
+    public IReadOnlyList<SC_Gem> CurrentBombMatches => currentBombMatches;
+    public IReadOnlyList<SC_Gem> CurrentBombBlastMatches => currentBombBlastMatches;
+    public IReadOnlyDictionary<GlobalEnums.GemType, int> CurrentMatchesComboCounter => currentMatchesComboCounter;
+
     #endregion
 
-    public GameBoard(int _Width, int _Height)
+    public GameBoard(int _width, int _height)
     {
-        height = _Height;
-        width = _Width;
-        allGems = new SC_Gem[width, height];
+        Height = _height;
+        Width = _width;
+        allGems = new SC_Gem[Width, Height];
     }
-    public bool MatchesAt(Vector2Int _PositionToCheck, SC_Gem _GemToCheck)
+
+    public bool MatchesAt(Vector2Int _positionToCheck, SC_Gem _gemToCheck)
     {
-        if (_PositionToCheck.x > 1)
+        if (_positionToCheck.x > 1)
         {
-            if (allGems[_PositionToCheck.x - 1, _PositionToCheck.y].type == _GemToCheck.type &&
-                allGems[_PositionToCheck.x - 2, _PositionToCheck.y].type == _GemToCheck.type)
+            if (allGems[_positionToCheck.x - 1, _positionToCheck.y].type == _gemToCheck.type &&
+                allGems[_positionToCheck.x - 2, _positionToCheck.y].type == _gemToCheck.type)
                 return true;
         }
 
-        if (_PositionToCheck.y > 1)
+        if (_positionToCheck.y > 1)
         {
-            if (allGems[_PositionToCheck.x, _PositionToCheck.y - 1].type == _GemToCheck.type &&
-                allGems[_PositionToCheck.x, _PositionToCheck.y - 2].type == _GemToCheck.type)
+            if (allGems[_positionToCheck.x, _positionToCheck.y - 1].type == _gemToCheck.type &&
+                allGems[_positionToCheck.x, _positionToCheck.y - 2].type == _gemToCheck.type)
                 return true;
         }
 
         return false;
     }
 
-    public void SetGem(int _X, int _Y, SC_Gem _Gem)
+    public void SetGem(int _x, int _y, SC_Gem _gem)
     {
-        allGems[_X, _Y] = _Gem;
-    }
-    public SC_Gem GetGem(int _X, int _Y)
-    {
-        return allGems[_X, _Y];
+        allGems[_x, _y] = _gem;
     }
 
-    public bool IsMatch(int x, int y, GlobalEnums.GemType gemType)
+    public SC_Gem GetGem(int _x, int _y)
     {
-        if (x < 0 || y < 0) return false;
-        if (x > width - 1 || y > height - 1) return false;
+        return allGems[_x, _y];
+    }
 
-        Debug.LogWarning($"Checking: {gemType}");
+    public bool IsTypeMatch(int _x, int _y, GlobalEnums.GemType _gemType)
+    {
+        if (_x < 0 || _y < 0) return false;
+        if (_x > Width - 1 || _y > Height - 1) return false;
 
-        if (x > 0 && x < width - 1)
+        if (_x >= 0 && _x <= Width - 1)
         {
-            SC_Gem leftGem = allGems[x - 1, y];
-            SC_Gem rightGem = allGems[x + 1, y];
+            SC_Gem leftGem = (_x > 0) ? allGems[_x - 1, _y] : null;
+            SC_Gem rightGem = (_x < Width - 1) ? allGems[_x + 1, _y] : null;
 
             // Check for empty spots
             if (leftGem != null && rightGem != null)
             {
                 //Match
-                if (leftGem.type == gemType && rightGem.type == gemType)
+                if (leftGem.type == _gemType && rightGem.type == _gemType)
                 {
-                    Debug.LogWarning($"Check Confirmed [Horizontal]: {gemType}");
                     return true;
                 }
             }
             // Check for extended matching
             else
             {
-                if (x > 1)
+                if (_x > 1)
                 {
-                    SC_Gem leftLeftGem = allGems[x - 2, y];
+                    SC_Gem leftLeftGem = allGems[_x - 2, _y];
                     if (leftGem != null && leftLeftGem != null)
                     {
                         // Match
-                        if (leftGem.type == gemType && leftLeftGem.type == gemType)
+                        if (leftGem.type == _gemType && leftLeftGem.type == _gemType)
                         {
-                            Debug.LogWarning($"Extended Check Confirmed [Left-Horizontal] : {gemType}");
                             return true;
                         }
                     }
                 }
 
-                if (x < width - 2)
+                if (_x < Width - 2)
                 {
-                    SC_Gem rightRightGem = allGems[x + 2, y];
+                    SC_Gem rightRightGem = allGems[_x + 2, _y];
                     if (rightGem != null && rightRightGem != null)
                     {
                         // Match
-                        if (rightGem.type == gemType && rightRightGem.type == gemType)
+                        if (rightGem.type == _gemType && rightRightGem.type == _gemType)
                         {
-                            Debug.LogWarning($"Extended Check Confirmed [Right-Horizontal] : {gemType}");
                             return true;
                         }
                     }
@@ -110,47 +110,44 @@ public class GameBoard
             }
         }
 
-        if (y > 0 && y < height - 1)
+        if (_y >= 0 && _y <= Height - 1)
         {
-            SC_Gem aboveGem = allGems[x, y - 1];
-            SC_Gem belowGem = allGems[x, y + 1];
+            SC_Gem aboveGem = (_y > 0) ? allGems[_x, _y - 1] : null;
+            SC_Gem belowGem = (_y < Height - 1) ? allGems[_x, _y + 1] : null;
 
             // Check for empty spots
             if (aboveGem != null && belowGem != null)
             {
                 //Match
-                if (aboveGem.type == gemType && belowGem.type == gemType)
+                if (aboveGem.type == _gemType && belowGem.type == _gemType)
                 {
-                    Debug.LogWarning($"Check Confirmed [Vertical]: {gemType}");
                     return true;
                 }
             }
             // Check for extended matching
             else
             {
-                if (y > 1)
+                if (_y > 1)
                 {
-                    SC_Gem aboveAboveGem = allGems[x, y - 2];
+                    SC_Gem aboveAboveGem = allGems[_x, _y - 2];
                     if (aboveGem != null && aboveAboveGem != null)
                     {
                         // Match
-                        if (aboveGem.type == gemType && aboveAboveGem.type == gemType)
+                        if (aboveGem.type == _gemType && aboveAboveGem.type == _gemType)
                         {
-                            Debug.LogWarning($"Extended Check Confirmed [Above-Vertical] : {gemType}");
                             return true;
                         }
                     }
                 }
 
-                if (y < height - 2)
+                if (_y < Height - 2)
                 {
-                    SC_Gem belowBelowGem = allGems[x, y + 2];
+                    SC_Gem belowBelowGem = allGems[_x, _y + 2];
                     if (belowGem != null && belowBelowGem != null)
                     {
                         // Match
-                        if (belowGem.type == gemType && belowBelowGem.type == gemType)
+                        if (belowGem.type == _gemType && belowBelowGem.type == _gemType)
                         {
-                            Debug.LogWarning($"Extended Check Confirmed [Below-Vertical] : {gemType}");
                             return true;
                         }
                     }
@@ -158,21 +155,24 @@ public class GameBoard
             }
         }
 
-        Debug.Log($"Clear: {gemType}");
         return false;
     }
 
     public void FindAllMatches()
     {
         currentMatches.Clear();
+        currentBombMatches.Clear();
+        currentBombBlastMatches.Clear();
+        currentMatchesComboCounter.Clear();
 
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
             {
                 SC_Gem currentGem = allGems[x, y];
                 if (currentGem != null)
                 {
-                    if (x > 0 && x < width - 1)
+                    if (x > 0 && x < Width - 1)
                     {
                         SC_Gem leftGem = allGems[x - 1, y];
                         SC_Gem rightGem = allGems[x + 1, y];
@@ -192,87 +192,139 @@ public class GameBoard
                         }
                     }
 
-                    if (y > 0 && y < height - 1)
+                    if (y > 0 && y < Height - 1)
                     {
                         SC_Gem aboveGem = allGems[x, y - 1];
-                        SC_Gem bellowGem = allGems[x, y + 1];
+                        SC_Gem belowGem = allGems[x, y + 1];
                         //checking no empty spots
-                        if (aboveGem != null && bellowGem != null)
+                        if (aboveGem != null && belowGem != null)
                         {
                             //Match
-                            if (aboveGem.type == currentGem.type && bellowGem.type == currentGem.type)
+                            if (aboveGem.type == currentGem.type && belowGem.type == currentGem.type)
                             {
                                 currentGem.isMatch = true;
                                 aboveGem.isMatch = true;
-                                bellowGem.isMatch = true;
+                                belowGem.isMatch = true;
                                 currentMatches.Add(currentGem);
                                 currentMatches.Add(aboveGem);
-                                currentMatches.Add(bellowGem);
+                                currentMatches.Add(belowGem);
                             }
                         }
                     }
                 }
             }
+        }
 
+        // Count Combos
         if (currentMatches.Count > 0)
+        {
             currentMatches = currentMatches.Distinct().ToList();
 
-        CheckForBombs();
-    }
+            for (int i = 0; i < currentMatches.Count; i++)
+            {
+                if (currentMatchesComboCounter.ContainsKey(currentMatches[i].type) == false)
+                {
+                    currentMatchesComboCounter.Add(currentMatches[i].type, 1);
+                }
+                else
+                {
+                    currentMatchesComboCounter[currentMatches[i].type]++;
+                }
+            }
 
-    public void CheckForBombs()
-    {
-        for (int i = 0; i < currentMatches.Count; i++)
+            // Filter out Bomb gems
+            for (int i = 0; i < currentMatches.Count; i++)
+            {
+                SC_Gem gem = currentMatches[i];
+                if (gem is not SC_Bomb) continue;
+
+                currentBombMatches.Add(gem as SC_Bomb);
+            }
+
+            // Remove Bombs from CurrentMatches
+            for (int i = 0; i < currentBombMatches.Count; i++)
+            {
+                currentMatches.Remove(currentBombMatches[i]);
+            }
+        }
+
+        if (currentBombMatches.Count > 0)
         {
-            SC_Gem gem = currentMatches[i];
-            int x = gem.posIndex.x;
-            int y = gem.posIndex.y;
-
-            if (gem.posIndex.x > 0)
-            {
-                if (allGems[x - 1, y] != null && allGems[x - 1, y].type == GlobalEnums.GemType.Bomb)
-                    MarkBombArea(new Vector2Int(x - 1, y), allGems[x - 1, y].blastSize);
-            }
-
-            if (gem.posIndex.x + 1 < width)
-            {
-                if (allGems[x + 1, y] != null && allGems[x + 1, y].type == GlobalEnums.GemType.Bomb)
-                    MarkBombArea(new Vector2Int(x + 1, y), allGems[x + 1, y].blastSize);
-            }
-
-            if (gem.posIndex.y > 0)
-            {
-                if (allGems[x, y - 1] != null && allGems[x, y - 1].type == GlobalEnums.GemType.Bomb)
-                    MarkBombArea(new Vector2Int(x, y - 1), allGems[x, y - 1].blastSize);
-            }
-
-            if (gem.posIndex.y + 1 < height)
-            {
-                if (allGems[x, y + 1] != null && allGems[x, y + 1].type == GlobalEnums.GemType.Bomb)
-                    MarkBombArea(new Vector2Int(x, y + 1), allGems[x, y + 1].blastSize);
-            }
+            CheckForBombBlasts(currentBombMatches);
         }
     }
 
-    public void MarkBombArea(Vector2Int bombPos, int _BlastSize)
+    private void CheckForBombBlasts(List<SC_Bomb> bombs)
     {
-        string _print = "";
-        for (int x = bombPos.x - _BlastSize; x <= bombPos.x + _BlastSize; x++)
+        List<SC_Gem> bombBlastMatches = new();
+        List<SC_Bomb> additionalBombMatches = new();
+
+        for (int i = 0; i < bombs.Count; i++)
         {
-            for (int y = bombPos.y - _BlastSize; y <= bombPos.y + _BlastSize; y++)
+            SC_Bomb bomb = bombs[i];
+
+            IEnumerable<SC_Gem> markArea = MarkBombArea(bomb.posIndex, bomb.BlastSize);
+            bombBlastMatches.AddRange(markArea);
+
+            foreach (SC_Gem gem in bombBlastMatches)
             {
-                if (x >= 0 && x < width && y >= 0 && y < height)
+                if (gem is SC_Bomb)
+                {
+                    additionalBombMatches.Add(gem as SC_Bomb);
+                }
+            }
+        }
+
+        currentBombBlastMatches = bombBlastMatches.Distinct().ToList();
+
+        additionalBombMatches = additionalBombMatches.Except(currentBombMatches).ToList();
+        if (additionalBombMatches.Count > 0)
+        {
+            for (int i = 0; i < additionalBombMatches.Count; i++)
+            {
+                currentBombMatches.Add(additionalBombMatches[i]);
+            }
+
+            CheckForBombBlasts(additionalBombMatches);
+        }
+    }
+
+    private IEnumerable<SC_Gem> MarkBombArea(Vector2Int bombPos, int _blastSize)
+    {
+        List<SC_Gem> bombBlastAreaMatches = new();
+
+        for (int x = bombPos.x - _blastSize; x <= bombPos.x + _blastSize; x++)
+        {
+            for (int y = bombPos.y - _blastSize; y <= bombPos.y + _blastSize; y++)
+            {
+                if (x >= 0 && x < Width && y >= 0 && y < Height)
                 {
                     if (allGems[x, y] != null)
                     {
-                        _print += "(" + x + "," + y + ")" + System.Environment.NewLine;
                         allGems[x, y].isMatch = true;
-                        currentMatches.Add(allGems[x, y]);
+                        bombBlastAreaMatches.Add(allGems[x, y]);
                     }
                 }
             }
         }
-        currentMatches = currentMatches.Distinct().ToList();
+
+        return bombBlastAreaMatches.Distinct().Except(currentMatches).Except(currentBombMatches);
+    }
+
+    public void CleanBoard()
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                if (allGems[x, y] == null) continue;
+
+                if (allGems[x, y].GetComponent<Poolable>().IsPooled)
+                {
+                    SetGem(x, y, null);
+                }
+            }
+        }
     }
 }
 
