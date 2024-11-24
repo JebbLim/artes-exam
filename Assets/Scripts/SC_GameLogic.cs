@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -74,7 +75,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
             for (int y = 0; y < gameBoard.Height; y++)
             {
                 Vector2 _pos = new Vector2(x, y);
-                GameObject _bgTile = Instantiate(config.BgTilePrefabs, _pos, Quaternion.identity);
+                GameObject _bgTile = Instantiate(config.BgTilePrefab, _pos, Quaternion.identity);
                 _bgTile.transform.SetParent(GemsContainer);
                 _bgTile.name = "BG Tile - " + x + ", " + y;
 
@@ -104,8 +105,9 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         _gem.transform.SetPositionAndRotation(new Vector3(_position.x, _position.y + config.DropHeight, 0f),
                                               Quaternion.identity);
 
+        string name = _gem is SC_Bomb ? "Bomb" : "Gem";
         _gem.transform.SetParent(GemsContainer);
-        _gem.name = "Gem - " + _position.x + ", " + _position.y;
+        _gem.name = $"{name} - " + _position.x + ", " + _position.y;
         gameBoard.SetGem(_position.x, _position.y, _gem);
 
         if (_overrideGemType.HasValue)
@@ -154,13 +156,16 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         DestroyGems(gameBoard.CurrentBombMatches);
         yield return new WaitForSeconds(config.SpawnDelayAfterDestruction);
 
+        gameBoard.CleanBoard();
+        yield return null;
+
         yield return StartCoroutine(SpawnBombCO());
         yield return null;
 
         gameBoard.CleanBoard();
         yield return null;
 
-        StartCoroutine(DecreaseRowCo());
+        StartCoroutine(DecreaseRowCO());
     }
 
     private void DestroyGems(IReadOnlyList<SC_Gem> gems)
@@ -169,8 +174,11 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         {
             if (gems[i] != null)
             {
+                Vector2Int posIndex = gems[i].posIndex;
+                if (gameBoard.GetGem(posIndex.x, posIndex.y) == null) continue;
+
                 ScoreCheck(gems[i]);
-                DestroyMatchedGemsAt(gems[i].posIndex);
+                DestroyMatchedGemsAt(posIndex);
             }
         }
     }
@@ -192,7 +200,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         }
     }
 
-    private IEnumerator DecreaseRowCo()
+    private IEnumerator DecreaseRowCO()
     {
         yield return null;
 

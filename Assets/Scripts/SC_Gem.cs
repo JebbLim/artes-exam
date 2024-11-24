@@ -24,7 +24,7 @@ public class SC_Gem : MonoBehaviour
     public Vector2Int posIndex;
     [HideInInspector] public bool isMatch;
 
-    void Update()
+    private void Update()
     {
         if (Vector2.Distance(transform.position, posIndex) > 0.01f)
             transform.position = Vector2.Lerp(transform.position, posIndex, gameConfig.GemSpeed * Time.deltaTime);
@@ -60,12 +60,12 @@ public class SC_Gem : MonoBehaviour
         StopAllCoroutines();
     }
 
-    public virtual void SetupGem(SC_GameLogic _ScGameLogic, Vector2Int _Position)
+    public virtual void SetupGem(SC_GameLogic _scGameLogic, Vector2Int _position)
     {
         gameConfig = GameConfig.Config;
 
-        posIndex = _Position;
-        scGameLogic = _ScGameLogic;
+        posIndex = _position;
+        scGameLogic = _scGameLogic;
     }
 
     private void OnMouseDown()
@@ -119,10 +119,10 @@ public class SC_Gem : MonoBehaviour
         scGameLogic.SetGem(posIndex.x, posIndex.y, this);
         scGameLogic.SetGem(otherGem.posIndex.x, otherGem.posIndex.y, otherGem);
 
-        StartCoroutine(CheckMoveCo());
+        StartCoroutine(CheckMoveCO());
     }
 
-    public IEnumerator CheckMoveCo()
+    public IEnumerator CheckMoveCO()
     {
         scGameLogic.SetState(GlobalEnums.GameState.Wait);
 

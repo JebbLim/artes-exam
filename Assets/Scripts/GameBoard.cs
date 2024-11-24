@@ -275,7 +275,7 @@ public class GameBoard
             }
         }
 
-        currentBombBlastMatches = bombBlastMatches.Distinct().ToList();
+        currentBombBlastMatches.AddRange(bombBlastMatches.Distinct().Except(additionalBombMatches).Except(currentBombBlastMatches));
 
         additionalBombMatches = additionalBombMatches.Except(currentBombMatches).ToList();
         if (additionalBombMatches.Count > 0)

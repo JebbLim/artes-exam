@@ -7,7 +7,7 @@ public class GameConfig : ScriptableObject
     public static GameConfig Config => ConfigRepository.GetConfig<GameConfig>();
 
     [Header("Configuration")]
-    public GameObject BgTilePrefabs;
+    public GameObject BgTilePrefab;
     public SC_Bomb BombPrefab;
     public SC_Gem[] GemPrefabs;
     public float BonusAmount = 0.5f;
