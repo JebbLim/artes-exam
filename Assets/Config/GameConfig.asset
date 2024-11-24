@@ -27,7 +27,11 @@ MonoBehaviour:
   DropHeight: 1
   GemSpeed: 7
   MinGemMatchForBombSpawn: 4
-  CascadingGemSpawnDelay: 0.2
+  BombBlastDelay: 0.25
+  BombDelay: 0.25
+  SpawnDelayAfterDestruction: 0.25
+  NewGemCascadeSpawnDelay: 0.03
+  DescendGemCascadeSpawnDelay: 0.03
   RowsSize: 7
   ColsSize: 7
   ScoreUpdateSpeed: 5

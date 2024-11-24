@@ -194,7 +194,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
 
     private IEnumerator DecreaseRowCo()
     {
-        yield return new WaitForSeconds(.2f);
+        yield return null;
 
         int nullCounter = 0;
         for (int x = 0; x < gameBoard.Width; x++)
@@ -211,6 +211,8 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
                     _curGem.posIndex.y -= nullCounter;
                     SetGem(x, y - nullCounter, _curGem);
                     SetGem(x, y, null);
+
+                    yield return new WaitForSeconds(config.DescendGemCascadeSpawnDelay);
                 }
             }
             nullCounter = 0;
@@ -262,7 +264,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
             if (userLastInputData[i].ShouldSpawnBomb)
             {
                 SpawnGem(userLastInputData[i].LastPosition, config.BombPrefab, userLastInputData[i].Type);
-                yield return new WaitForSeconds(config.CascadingGemSpawnDelay);
+                yield return new WaitForSeconds(config.NewGemCascadeSpawnDelay);
             }
         }
 
@@ -301,7 +303,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
                     SC_Gem gemPrefab = config.GetGemPrefab(selectedGemType.Value);
 
                     SpawnGem(new Vector2Int(x, y), gemPrefab);
-                    yield return new WaitForSeconds(config.CascadingGemSpawnDelay);
+                    yield return new WaitForSeconds(config.NewGemCascadeSpawnDelay);
                 }
             }
         }
