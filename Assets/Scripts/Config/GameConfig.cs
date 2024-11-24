@@ -16,12 +16,17 @@ public class GameConfig : ScriptableObject
     public float GemSpeed;
     public int MinGemMatchForBombSpawn = 4;
 
+    [Header("Destroy Configuration")]
+    public float BombBlastDelay = 0.25f;
+    public float BombDelay = 0.25f;
+
     [Header("Gem Spawning")]
+    public float SpawnDelayAfterDestruction = 0.25f;
     public float CascadingGemSpawnDelay = 0.2f;
 
-    [Header("Board")]
-    public int RowsSize = 7;
-    public int ColsSize = 7;
+    //[Header("Board")]
+    [HideInInspector] public int RowsSize = 7;
+    [HideInInspector] public int ColsSize = 7;
 
     [Header("Display")]
     public float ScoreUpdateSpeed = 5.0f;

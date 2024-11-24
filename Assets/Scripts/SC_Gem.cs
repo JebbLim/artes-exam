@@ -21,7 +21,7 @@ public class SC_Gem : MonoBehaviour
     private SC_Gem otherGem;
     private Vector2Int previousPos;
 
-    [HideInInspector] public Vector2Int posIndex;
+    public Vector2Int posIndex;
     [HideInInspector] public bool isMatch;
 
     void Update()
@@ -56,6 +56,8 @@ public class SC_Gem : MonoBehaviour
         previousPos = Vector2Int.zero;
 
         posIndex = Vector2Int.zero;
+
+        StopAllCoroutines();
     }
 
     public virtual void SetupGem(SC_GameLogic _ScGameLogic, Vector2Int _Position)
@@ -142,9 +144,16 @@ public class SC_Gem : MonoBehaviour
             }
             else
             {
-                scGameLogic.UserLastInputData(posIndex, type);
+                scGameLogic.UserLastInputData(new SC_GameLogic.UserLastMovedData(posIndex, type),
+                                              new SC_GameLogic.UserLastMovedData(otherGem.posIndex, otherGem.type));
                 scGameLogic.DestroyMatches();
             }
         }
+    }
+
+    public virtual void Despawn()
+    {
+        Instantiate(destroyEffect, new Vector2(posIndex.x, posIndex.y), Quaternion.identity);
+        GetComponent<Poolable>().Pool();
     }
 }

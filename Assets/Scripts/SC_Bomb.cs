@@ -16,4 +16,16 @@ public class SC_Bomb : SC_Gem
 
         ColorSprite.sprite = GameConfig.Config.GetGemPrefab(type).spriteRenderer.sprite;
     }
+
+    public override void Despawn()
+    {
+        StartCoroutine(DespawnCO());
+    }
+
+    private IEnumerator DespawnCO()
+    {
+        yield return new WaitForSeconds(0.15f);
+        Instantiate(destroyEffect, new Vector2(posIndex.x, posIndex.y), Quaternion.identity);
+        GetComponent<Poolable>().Pool();
+    }
 }
