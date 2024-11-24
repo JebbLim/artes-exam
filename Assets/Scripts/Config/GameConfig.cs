@@ -22,7 +22,8 @@ public class GameConfig : ScriptableObject
 
     [Header("Gem Spawning")]
     public float SpawnDelayAfterDestruction = 0.2f;
-    public float CascadingGemSpawnDelay = 0.2f;
+    public float NewGemCascadeSpawnDelay = 0.05f;
+    public float DescendGemCascadeSpawnDelay = 0.025f;
 
     //[Header("Board")]
     [HideInInspector] public int RowsSize = 7;
