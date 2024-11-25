@@ -74,21 +74,20 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         {
             for (int y = 0; y < gameBoard.Height; y++)
             {
-                Vector2 _pos = new Vector2(x, y);
-                GameObject _bgTile = Instantiate(config.BgTilePrefab, _pos, Quaternion.identity);
+                GameObject _bgTile = Instantiate(config.BgTilePrefab, new(x, y), Quaternion.identity);
                 _bgTile.transform.SetParent(GemsContainer);
                 _bgTile.name = "BG Tile - " + x + ", " + y;
 
                 GlobalEnums.GemType _gemToUse = (GlobalEnums.GemType)Random.Range(0, (int)GlobalEnums.GemType.Length);
 
                 int iterations = 0;
-                while (gameBoard.MatchesAt(new Vector2Int(x, y), config.GetGemPrefab(_gemToUse)) && iterations < 100)
+                while (gameBoard.MatchesAt(x, y, config.GetGemPrefab(_gemToUse)) && iterations < 100)
                 {
                     _gemToUse = (GlobalEnums.GemType)Random.Range(0, (int)GlobalEnums.GemType.Length);
                     iterations++;
                 }
 
-                SpawnGem(new Vector2Int(x, y), config.GetGemPrefab(_gemToUse));
+                SpawnGem(x, y, config.GetGemPrefab(_gemToUse));
             }
         }
     }
@@ -99,24 +98,29 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         EvtGameStarted.Invoke();
     }
 
-    private void SpawnGem(Vector2Int _position, SC_Gem _gemToSpawn, GlobalEnums.GemType? _overrideGemType = null)
+    private void SpawnGem(int _x, int _y, SC_Gem _gemToSpawn, GlobalEnums.GemType? _overrideGemType = null)
     {
         SC_Gem _gem = objectPooling.GetPooledObject<SC_Gem>(_gemToSpawn);
-        _gem.transform.SetPositionAndRotation(new Vector3(_position.x, _position.y + config.DropHeight, 0f),
+        _gem.transform.SetPositionAndRotation(new Vector3(_x, _y + config.DropHeight, 0.0f),
                                               Quaternion.identity);
 
         string name = _gem is SC_Bomb ? "Bomb" : "Gem";
         _gem.transform.SetParent(GemsContainer);
-        _gem.name = $"{name} - " + _position.x + ", " + _position.y;
-        gameBoard.SetGem(_position.x, _position.y, _gem);
+        _gem.name = $"{name} - " + _x + ", " + _y;
+        gameBoard.SetGem(_x, _y, _gem);
 
         if (_overrideGemType.HasValue)
         {
             _gem.Type = _overrideGemType.Value;
         }
 
-        _gem.SetupGem(this, _position);
+        _gem.SetupGem(this, new(_x, _y));
         _gem.gameObject.SetActive(true);
+    }
+
+    private void SpawnGem(Vector2Int _position, SC_Gem _gemToSpawn, GlobalEnums.GemType? _overrideGemType = null)
+    {
+        SpawnGem(_position.x, _position.y, _gemToSpawn, _overrideGemType);
     }
 
     public void SetGem(int _x, int _y, SC_Gem _gem)
@@ -305,12 +309,12 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
                     if (selectedGemType == null)
                     {
                         selectedGemType = (GlobalEnums.GemType)Random.Range(0, length);
-                        Debug.LogError($"[GB] Randomized: {selectedGemType}");
+                        Debug.LogWarning($"[GL] RefillBoard, Randomized: {selectedGemType}");
                     }
 
                     SC_Gem gemPrefab = config.GetGemPrefab(selectedGemType.Value);
 
-                    SpawnGem(new Vector2Int(x, y), gemPrefab);
+                    SpawnGem(x, y, gemPrefab);
                     yield return new WaitForSeconds(config.NewGemCascadeSpawnDelay);
                 }
             }
