@@ -295,7 +295,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
                     {
                         GlobalEnums.GemType gemType = (GlobalEnums.GemType)rand.Next(i + 1);
 
-                        if (gameBoard.IsTypeMatch(x, y, gemType) == false)
+                        if (gameBoard.MatchesAt(x, y, gemType) == false)
                         {
                             selectedGemType = gemType;
                             break;
