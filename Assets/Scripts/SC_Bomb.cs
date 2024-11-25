@@ -15,7 +15,7 @@ public class SC_Bomb : SC_Gem
     {
         base.SetupGem(_scGameLogic, _position);
 
-        ColorSprite.sprite = GameConfig.Config.GetGemPrefab(type).spriteRenderer.sprite;
+        ColorSprite.sprite = GameConfig.Config.GetGemPrefab(Type).SpriteRenderer.sprite;
     }
 
     public override void Despawn()
@@ -26,7 +26,7 @@ public class SC_Bomb : SC_Gem
     private IEnumerator DespawnCO()
     {
         yield return new WaitForSeconds(DespawnDelay);
-        Instantiate(destroyEffect, new Vector2(posIndex.x, posIndex.y), Quaternion.identity);
+        Instantiate(DestroyEffect, new Vector2(PosIndex.x, PosIndex.y), Quaternion.identity);
         GetComponent<Poolable>().Pool();
     }
 }

@@ -112,7 +112,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
 
         if (_overrideGemType.HasValue)
         {
-            _gem.type = _overrideGemType.Value;
+            _gem.Type = _overrideGemType.Value;
         }
 
         _gem.SetupGem(this, _position);
@@ -168,16 +168,16 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
         StartCoroutine(DecreaseRowCO());
     }
 
-    private void DestroyGems(IReadOnlyList<SC_Gem> gems)
+    private void DestroyGems(IReadOnlyList<SC_Gem> _gems)
     {
-        for (int i = 0; i < gems.Count; i++)
+        for (int i = 0; i < _gems.Count; i++)
         {
-            if (gems[i] != null)
+            if (_gems[i] != null)
             {
-                Vector2Int posIndex = gems[i].posIndex;
+                Vector2Int posIndex = _gems[i].PosIndex;
                 if (gameBoard.GetGem(posIndex.x, posIndex.y) == null) continue;
 
-                ScoreCheck(gems[i]);
+                ScoreCheck(_gems[i]);
                 DestroyMatchedGemsAt(posIndex);
             }
         }
@@ -216,7 +216,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
                 }
                 else if (nullCounter > 0)
                 {
-                    _curGem.posIndex.y -= nullCounter;
+                    _curGem.PosIndex.y -= nullCounter;
                     SetGem(x, y - nullCounter, _curGem);
                     SetGem(x, y, null);
 
@@ -231,7 +231,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
 
     public void ScoreCheck(SC_Gem _gemToCheck)
     {
-        gameBoard.Score += _gemToCheck.scoreValue;
+        gameBoard.Score += _gemToCheck.ScoreValue;
         EvtScoreUpdated.Invoke(gameBoard.Score);
     }
 
@@ -295,7 +295,7 @@ public class SC_GameLogic : Singleton<SC_GameLogic>
                     {
                         GlobalEnums.GemType gemType = (GlobalEnums.GemType)rand.Next(i + 1);
 
-                        if (gameBoard.IsTypeMatch(x, y, gemType) == false)
+                        if (gameBoard.MatchesAt(x, y, gemType) == false)
                         {
                             selectedGemType = gemType;
                             break;

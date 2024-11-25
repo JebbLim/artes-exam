@@ -35,6 +35,6 @@ public class GameConfig : ScriptableObject
 
     public SC_Gem GetGemPrefab(GlobalEnums.GemType gemType)
     {
-        return GemPrefabs.Single(g => g.type == gemType);
+        return GemPrefabs.Single(g => g.Type == gemType);
     }
 }
