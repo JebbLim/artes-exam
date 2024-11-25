@@ -62,9 +62,9 @@ public class GameBoard
         return false;
     }
 
-    public bool MatchesAt(Vector2Int _positionToCheck, SC_Gem _gemToCheck)
+    public bool MatchesAt(int _x, int _y, SC_Gem _gemToCheck)
     {
-        return MatchesAt(_positionToCheck.x, _positionToCheck.y, _gemToCheck.Type);
+        return MatchesAt(_x, _y, _gemToCheck.Type);
     }
 
     public void FindAllMatches()
