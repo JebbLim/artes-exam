@@ -4,12 +4,12 @@ using UnityEngine;
 public class SC_Gem : MonoBehaviour
 {
     [Header("Configuration")]
-    public GlobalEnums.GemType type;
-    public int scoreValue = 10;
+    public GlobalEnums.GemType Type;
+    public int ScoreValue = 10;
 
     [Header("References")]
-    public SpriteRenderer spriteRenderer;
-    public GameObject destroyEffect;
+    public SpriteRenderer SpriteRenderer;
+    public GameObject DestroyEffect;
 
     private SC_GameLogic scGameLogic;
     private GameConfig gameConfig;
@@ -21,17 +21,17 @@ public class SC_Gem : MonoBehaviour
     private SC_Gem otherGem;
     private Vector2Int previousPos;
 
-    public Vector2Int posIndex;
-    [HideInInspector] public bool isMatch;
+    [HideInInspector] public Vector2Int PosIndex;
+    public bool IsMatch { get; set; }
 
     private void Update()
     {
-        if (Vector2.Distance(transform.position, posIndex) > 0.01f)
-            transform.position = Vector2.Lerp(transform.position, posIndex, gameConfig.GemSpeed * Time.deltaTime);
+        if (Vector2.Distance(transform.position, PosIndex) > 0.01f)
+            transform.position = Vector2.Lerp(transform.position, PosIndex, gameConfig.GemSpeed * Time.deltaTime);
         else
         {
-            transform.position = new Vector3(posIndex.x, posIndex.y, 0);
-            scGameLogic.SetGem(posIndex.x, posIndex.y, this);
+            transform.position = new Vector3(PosIndex.x, PosIndex.y, 0);
+            scGameLogic.SetGem(PosIndex.x, PosIndex.y, this);
         }
         if (mousePressed && Input.GetMouseButtonUp(0))
         {
@@ -46,7 +46,7 @@ public class SC_Gem : MonoBehaviour
 
     private void OnDisable()
     {
-        isMatch = false;
+        IsMatch = false;
         firstTouchPosition = Vector2.zero;
         finalTouchPosition = Vector2.zero;
 
@@ -55,7 +55,7 @@ public class SC_Gem : MonoBehaviour
         otherGem = null;
         previousPos = Vector2Int.zero;
 
-        posIndex = Vector2Int.zero;
+        PosIndex = Vector2Int.zero;
 
         StopAllCoroutines();
     }
@@ -64,7 +64,7 @@ public class SC_Gem : MonoBehaviour
     {
         gameConfig = GameConfig.Config;
 
-        posIndex = _position;
+        PosIndex = _position;
         scGameLogic = _scGameLogic;
     }
 
@@ -88,36 +88,36 @@ public class SC_Gem : MonoBehaviour
 
     private void MovePieces()
     {
-        previousPos = posIndex;
+        previousPos = PosIndex;
 
-        if (swipeAngle < 45 && swipeAngle > -45 && posIndex.x < gameConfig.RowsSize - 1)
+        if (swipeAngle < 45 && swipeAngle > -45 && PosIndex.x < gameConfig.RowsSize - 1)
         {
-            otherGem = scGameLogic.GetGem(posIndex.x + 1, posIndex.y);
-            otherGem.posIndex.x--;
-            posIndex.x++;
+            otherGem = scGameLogic.GetGem(PosIndex.x + 1, PosIndex.y);
+            otherGem.PosIndex.x--;
+            PosIndex.x++;
 
         }
-        else if (swipeAngle > 45 && swipeAngle <= 135 && posIndex.y < gameConfig.ColsSize - 1)
+        else if (swipeAngle > 45 && swipeAngle <= 135 && PosIndex.y < gameConfig.ColsSize - 1)
         {
-            otherGem = scGameLogic.GetGem(posIndex.x, posIndex.y + 1);
-            otherGem.posIndex.y--;
-            posIndex.y++;
+            otherGem = scGameLogic.GetGem(PosIndex.x, PosIndex.y + 1);
+            otherGem.PosIndex.y--;
+            PosIndex.y++;
         }
-        else if (swipeAngle < -45 && swipeAngle >= -135 && posIndex.y > 0)
+        else if (swipeAngle < -45 && swipeAngle >= -135 && PosIndex.y > 0)
         {
-            otherGem = scGameLogic.GetGem(posIndex.x, posIndex.y - 1);
-            otherGem.posIndex.y++;
-            posIndex.y--;
+            otherGem = scGameLogic.GetGem(PosIndex.x, PosIndex.y - 1);
+            otherGem.PosIndex.y++;
+            PosIndex.y--;
         }
-        else if (swipeAngle > 135 || swipeAngle < -135 && posIndex.x > 0)
+        else if (swipeAngle > 135 || swipeAngle < -135 && PosIndex.x > 0)
         {
-            otherGem = scGameLogic.GetGem(posIndex.x - 1, posIndex.y);
-            otherGem.posIndex.x++;
-            posIndex.x--;
+            otherGem = scGameLogic.GetGem(PosIndex.x - 1, PosIndex.y);
+            otherGem.PosIndex.x++;
+            PosIndex.x--;
         }
 
-        scGameLogic.SetGem(posIndex.x, posIndex.y, this);
-        scGameLogic.SetGem(otherGem.posIndex.x, otherGem.posIndex.y, otherGem);
+        scGameLogic.SetGem(PosIndex.x, PosIndex.y, this);
+        scGameLogic.SetGem(otherGem.PosIndex.x, otherGem.PosIndex.y, otherGem);
 
         StartCoroutine(CheckMoveCO());
     }
@@ -131,21 +131,21 @@ public class SC_Gem : MonoBehaviour
 
         if (otherGem != null)
         {
-            if (isMatch == false && otherGem.isMatch == false)
+            if (IsMatch == false && otherGem.IsMatch == false)
             {
-                otherGem.posIndex = posIndex;
-                posIndex = previousPos;
+                otherGem.PosIndex = PosIndex;
+                PosIndex = previousPos;
 
-                scGameLogic.SetGem(posIndex.x, posIndex.y, this);
-                scGameLogic.SetGem(otherGem.posIndex.x, otherGem.posIndex.y, otherGem);
+                scGameLogic.SetGem(PosIndex.x, PosIndex.y, this);
+                scGameLogic.SetGem(otherGem.PosIndex.x, otherGem.PosIndex.y, otherGem);
 
                 yield return new WaitForSeconds(.5f);
                 scGameLogic.SetState(GlobalEnums.GameState.Move);
             }
             else
             {
-                scGameLogic.UserLastInputData(new SC_GameLogic.UserLastMovedData(posIndex, type),
-                                              new SC_GameLogic.UserLastMovedData(otherGem.posIndex, otherGem.type));
+                scGameLogic.UserLastInputData(new SC_GameLogic.UserLastMovedData(PosIndex, Type),
+                                              new SC_GameLogic.UserLastMovedData(otherGem.PosIndex, otherGem.Type));
                 scGameLogic.DestroyMatches();
             }
         }
@@ -153,7 +153,7 @@ public class SC_Gem : MonoBehaviour
 
     public virtual void Despawn()
     {
-        Instantiate(destroyEffect, new Vector2(posIndex.x, posIndex.y), Quaternion.identity);
+        Instantiate(DestroyEffect, new Vector2(PosIndex.x, PosIndex.y), Quaternion.identity);
         GetComponent<Poolable>().Pool();
     }
 }

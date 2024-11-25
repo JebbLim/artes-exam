@@ -98,14 +98,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5d1e13e319aa044e9776fbd351e9d03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
-  destroyEffect: {fileID: 8904178830182364799, guid: d794be08823edd34da1790efd1739074,
+  Type: 0
+  ScoreValue: 10
+  SpriteRenderer: {fileID: 7667143225876670884}
+  DestroyEffect: {fileID: 8904178830182364799, guid: d794be08823edd34da1790efd1739074,
     type: 3}
-  scoreValue: 10
-  blastSize: 0
-  spriteRenderer: {fileID: 7667143225876670884}
-  posIndex: {x: 0, y: 0}
-  isMatch: 0
+  PosIndex: {x: 0, y: 0}
 --- !u!61 &-4313073739878660840
 BoxCollider2D:
   m_ObjectHideFlags: 0

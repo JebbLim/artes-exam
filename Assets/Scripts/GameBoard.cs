@@ -31,25 +31,6 @@ public class GameBoard
         allGems = new SC_Gem[Width, Height];
     }
 
-    public bool MatchesAt(Vector2Int _positionToCheck, SC_Gem _gemToCheck)
-    {
-        if (_positionToCheck.x > 1)
-        {
-            if (allGems[_positionToCheck.x - 1, _positionToCheck.y].type == _gemToCheck.type &&
-                allGems[_positionToCheck.x - 2, _positionToCheck.y].type == _gemToCheck.type)
-                return true;
-        }
-
-        if (_positionToCheck.y > 1)
-        {
-            if (allGems[_positionToCheck.x, _positionToCheck.y - 1].type == _gemToCheck.type &&
-                allGems[_positionToCheck.x, _positionToCheck.y - 2].type == _gemToCheck.type)
-                return true;
-        }
-
-        return false;
-    }
-
     public void SetGem(int _x, int _y, SC_Gem _gem)
     {
         allGems[_x, _y] = _gem;
@@ -60,102 +41,30 @@ public class GameBoard
         return allGems[_x, _y];
     }
 
-    public bool IsTypeMatch(int _x, int _y, GlobalEnums.GemType _gemType)
+    public bool MatchesAt(int _x, int _y, GlobalEnums.GemType _gemType)
     {
-        if (_x < 0 || _y < 0) return false;
-        if (_x > Width - 1 || _y > Height - 1) return false;
-
-        if (_x >= 0 && _x <= Width - 1)
+        if (_x > 1)
         {
-            SC_Gem leftGem = (_x > 0) ? allGems[_x - 1, _y] : null;
-            SC_Gem rightGem = (_x < Width - 1) ? allGems[_x + 1, _y] : null;
-
-            // Check for empty spots
-            if (leftGem != null && rightGem != null)
+            if (allGems[_x - 1, _y].Type == _gemType && allGems[_x - 2, _y].Type == _gemType)
             {
-                //Match
-                if (leftGem.type == _gemType && rightGem.type == _gemType)
-                {
-                    return true;
-                }
-            }
-            // Check for extended matching
-            else
-            {
-                if (_x > 1)
-                {
-                    SC_Gem leftLeftGem = allGems[_x - 2, _y];
-                    if (leftGem != null && leftLeftGem != null)
-                    {
-                        // Match
-                        if (leftGem.type == _gemType && leftLeftGem.type == _gemType)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                if (_x < Width - 2)
-                {
-                    SC_Gem rightRightGem = allGems[_x + 2, _y];
-                    if (rightGem != null && rightRightGem != null)
-                    {
-                        // Match
-                        if (rightGem.type == _gemType && rightRightGem.type == _gemType)
-                        {
-                            return true;
-                        }
-                    }
-                }
+                return true;
             }
         }
 
-        if (_y >= 0 && _y <= Height - 1)
+        if (_y > 1)
         {
-            SC_Gem aboveGem = (_y > 0) ? allGems[_x, _y - 1] : null;
-            SC_Gem belowGem = (_y < Height - 1) ? allGems[_x, _y + 1] : null;
-
-            // Check for empty spots
-            if (aboveGem != null && belowGem != null)
+            if (allGems[_x, _y - 1].Type == _gemType && allGems[_x, _y - 2].Type == _gemType)
             {
-                //Match
-                if (aboveGem.type == _gemType && belowGem.type == _gemType)
-                {
-                    return true;
-                }
-            }
-            // Check for extended matching
-            else
-            {
-                if (_y > 1)
-                {
-                    SC_Gem aboveAboveGem = allGems[_x, _y - 2];
-                    if (aboveGem != null && aboveAboveGem != null)
-                    {
-                        // Match
-                        if (aboveGem.type == _gemType && aboveAboveGem.type == _gemType)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                if (_y < Height - 2)
-                {
-                    SC_Gem belowBelowGem = allGems[_x, _y + 2];
-                    if (belowGem != null && belowBelowGem != null)
-                    {
-                        // Match
-                        if (belowGem.type == _gemType && belowBelowGem.type == _gemType)
-                        {
-                            return true;
-                        }
-                    }
-                }
+                return true;
             }
         }
 
         return false;
+    }
+
+    public bool MatchesAt(Vector2Int _positionToCheck, SC_Gem _gemToCheck)
+    {
+        return MatchesAt(_positionToCheck.x, _positionToCheck.y, _gemToCheck.Type);
     }
 
     public void FindAllMatches()
@@ -180,11 +89,11 @@ public class GameBoard
                         if (leftGem != null && rightGem != null)
                         {
                             //Match
-                            if (leftGem.type == currentGem.type && rightGem.type == currentGem.type)
+                            if (leftGem.Type == currentGem.Type && rightGem.Type == currentGem.Type)
                             {
-                                currentGem.isMatch = true;
-                                leftGem.isMatch = true;
-                                rightGem.isMatch = true;
+                                currentGem.IsMatch = true;
+                                leftGem.IsMatch = true;
+                                rightGem.IsMatch = true;
                                 currentMatches.Add(currentGem);
                                 currentMatches.Add(leftGem);
                                 currentMatches.Add(rightGem);
@@ -200,11 +109,11 @@ public class GameBoard
                         if (aboveGem != null && belowGem != null)
                         {
                             //Match
-                            if (aboveGem.type == currentGem.type && belowGem.type == currentGem.type)
+                            if (aboveGem.Type == currentGem.Type && belowGem.Type == currentGem.Type)
                             {
-                                currentGem.isMatch = true;
-                                aboveGem.isMatch = true;
-                                belowGem.isMatch = true;
+                                currentGem.IsMatch = true;
+                                aboveGem.IsMatch = true;
+                                belowGem.IsMatch = true;
                                 currentMatches.Add(currentGem);
                                 currentMatches.Add(aboveGem);
                                 currentMatches.Add(belowGem);
@@ -222,13 +131,13 @@ public class GameBoard
 
             for (int i = 0; i < currentMatches.Count; i++)
             {
-                if (currentMatchesComboCounter.ContainsKey(currentMatches[i].type) == false)
+                if (currentMatchesComboCounter.ContainsKey(currentMatches[i].Type) == false)
                 {
-                    currentMatchesComboCounter.Add(currentMatches[i].type, 1);
+                    currentMatchesComboCounter.Add(currentMatches[i].Type, 1);
                 }
                 else
                 {
-                    currentMatchesComboCounter[currentMatches[i].type]++;
+                    currentMatchesComboCounter[currentMatches[i].Type]++;
                 }
             }
 
@@ -263,7 +172,7 @@ public class GameBoard
         {
             SC_Bomb bomb = bombs[i];
 
-            IEnumerable<SC_Gem> markArea = MarkBombArea(bomb.posIndex, bomb.BlastSize);
+            IEnumerable<SC_Gem> markArea = MarkBombArea(bomb.PosIndex, bomb.BlastSize);
             bombBlastMatches.AddRange(markArea);
 
             foreach (SC_Gem gem in bombBlastMatches)

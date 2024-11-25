@@ -240,13 +240,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84cc9751a17c608438e6517e8d8ad033, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
-  scoreValue: 10
-  spriteRenderer: {fileID: 1210587634127288448}
-  destroyEffect: {fileID: 8968486364681163996, guid: 05c754e3d4f9fd349ac1def58d17670f,
+  Type: 0
+  ScoreValue: 10
+  SpriteRenderer: {fileID: 1210587634127288448}
+  DestroyEffect: {fileID: 8968486364681163996, guid: 05c754e3d4f9fd349ac1def58d17670f,
     type: 3}
-  posIndex: {x: 0, y: 0}
-  isMatch: 0
+  PosIndex: {x: 0, y: 0}
   BlastSize: 2
   DespawnDelay: 0.15
   ColorSprite: {fileID: 7699685489904338081}
